@@ -21,6 +21,10 @@ type mixer
 type sample
 type sample_id
 
+(** {3Native dialogs} *)
+type filechooser
+type menu
+
 (** {2 Aggregation types} *)
 
 type pos = float * float
@@ -340,6 +344,30 @@ module Playmode = struct
   | LOOP
   | LOOP_ONCE
   | BIDIR
+end
+
+
+module FileChooser = struct
+  let file_must_exist = 1 lsl 0
+  let save = 1 lsl 1
+  let folder = 1 lsl 2
+  let pictures = 1 lsl 3
+  let show_hidden = 1 lsl 4
+  let multiple = 1 lsl 5
+end
+
+module MessageBox = struct
+  let warn = 1 lsl 0
+  let error = 1 lsl 1
+  let question = 1 lsl 2
+  let ok_cancel = 1 lsl 3
+  let yes_no = 1 lsl 4
+end
+
+module MenuItem = struct
+  let disabled = 1 lsl 0
+  let checkbox = 1 lsl 1
+  let checked = 1 lsl 2
 end
 
 (** {2 Events} *)
@@ -823,3 +851,47 @@ external draw_polyline : pos array -> LineJoin.t -> LineCap.t -> color -> float 
 external draw_polygon : pos array -> LineJoin.t -> color -> float -> unit = "ml_al_draw_polygon"
 external draw_filled_polygon : pos array -> color -> unit = "ml_al_draw_filled_polygon"
 external draw_filled_polygon_with_holes : pos array -> pos array list -> color -> unit = "ml_al_draw_filled_polygon_with_holes"
+
+(** {1 Native dialogs addon} *)
+
+external init_native_dialog_addon : unit -> unit = "ml_al_init_native_dialog_addon"
+external is_native_dialog_addon_initialized : unit -> bool = "ml_al_is_native_dialog_addon_initialized"
+external shutdown_native_dialog_addon : unit -> unit = "ml_al_shutdown_native_dialog_addon"
+external get_allegro_native_dialog_version : unit -> int = "ml_al_get_allegro_native_dialog_version"
+
+(** {2 Native file chooser routines} *)
+
+external create_native_file_dialog : string -> string -> string -> int -> filechooser = "ml_al_create_native_file_dialog"
+external show_native_file_dialog : display option -> filechooser -> bool = "ml_al_show_native_file_dialog"
+external get_native_file_dialog_count : filechooser -> int = "ml_al_get_native_file_dialog_count"
+external get_native_file_dialog_path : filechooser -> int -> string = "ml_al_get_native_file_dialog_path"
+external destroy_native_file_dialog : filechooser -> unit = "ml_al_destroy_native_file_dialog"
+
+(** {2 Native message box routines} *)
+
+external show_native_message_box : display option -> string -> string -> string -> string option -> int -> int = "ml_al_show_native_message_box_bytecode" "ml_al_show_native_message_box"
+
+(** {2 Native menu routines} *)
+external create_menu : unit -> menu = "ml_al_create_menu"
+external create_popup_menu : unit -> menu = "ml_al_create_popup_menu"
+external append_menu_item : menu -> string -> int -> int -> bitmap option -> menu option -> int = "ml_al_append_menu_item_bytecode" "ml_al_append_menu_item"
+external insert_menu_item : menu -> string -> string -> int -> int -> bitmap -> menu -> int = "ml_al_insert_menu_item_bytecode" "ml_al_insert_menu_item"
+external remove_menu_item : menu -> int -> bool = "ml_al_remove_menu_item"
+external clone_menu : menu -> menu = "ml_al_clone_menu"
+external clone_menu_for_popup : menu -> menu = "ml_al_clone_menu_for_popup"
+external destroy_menu : menu -> unit = "ml_al_destroy_menu"
+external get_menu_item_caption : menu -> int -> string = "ml_al_get_menu_item_caption"
+external set_menu_item_caption : menu -> int -> string -> unit = "ml_al_set_menu_item_caption"
+external get_menu_item_flags : menu -> int -> int = "ml_al_get_menu_item_flags"
+external set_menu_item_flags : menu -> int -> int -> unit = "ml_al_set_menu_item_flags"
+external get_menu_item_icon : menu -> int -> bitmap option = "ml_al_get_menu_item_icon"
+external set_menu_item_icon : menu -> int -> bitmap -> unit = "ml_al_set_menu_item_icon"
+external find_menu : menu -> int -> menu option = "ml_al_find_menu"
+external find_menu_item : menu -> int -> (menu * int) option = "ml_al_find_menu_item"
+external get_default_menu_event_source : unit -> event_source = "ml_al_get_default_menu_event_source"
+external enable_menu_event_source : menu -> event_source = "ml_al_enable_menu_event_source"
+external disable_menu_event_source : menu -> unit = "ml_al_disable_menu_event_source"
+external get_display_menu : display -> menu option = "ml_al_get_display_menu"
+external set_display_menu : display -> menu option -> bool = "ml_al_set_display_menu"
+external popup_menu : menu -> display -> bool = "ml_al_popup_menu"
+external remove_display_menu : display -> menu = "ml_al_remove_display_menu"
